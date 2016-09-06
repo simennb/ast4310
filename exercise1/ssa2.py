@@ -68,8 +68,8 @@ def saha_E(temp,elpress,ionstage):
 
     return nstagerel[ionstage-1]
 
-for r in range(1,6):
-    print saha_E(20000*units.K,1e1,r)
+#for r in range(1,6):
+ #   print saha_E(20000*units.K,1e1,r)
 
 
 ##########################################
@@ -81,12 +81,14 @@ def sahabolt_E(temp,elpress,ion,level):
 
 
 if __name__=='__main__':
-    task = 1#'2.5'
+    task = '2.5'
 
 
     if task=='2.5':
         temp = np.arange(0,30001,1000)*units.K
         pop = zeros((5,31))
+
+        '''
         for T in np.arange(1,31):
             for r in np.arange(1,5):
                 pop[r,T] = sahabolt_E(temp[T],131.,r,1)
@@ -99,7 +101,33 @@ if __name__=='__main__':
         xlabel(r'Temperature [K]',size=15)
         ylabel(r'Population $n_{r,1}/N$',size=15)
         yscale('log')
+        grid('on')
         ylim([1e-3,1.1])
         legend(['ground stage','first ion stage','second ion stage','third ion stage'],loc='best')
         savefig('schadeenium_pop.png')
         show()
+        '''
+
+        # adding more lines
+        figure()
+        grid('on')
+        colors = ['b','g','r','k']
+        lines = ['-','--','--']
+        s = [1,2,4]
+        for j in range(len(s)):
+            for T in np.arange(1,31):
+                for r in np.arange(1,5):
+                    pop[r,T] = sahabolt_E(temp[T],131.,r,s[j])
+
+            # plot
+            for i in range(1,5):
+                plot(temp,pop[i,:],lines[j]+colors[i-1])
+        title(r'Level population for $P_e = 131$ dyne cm${}^{-2}$',size=15)
+        xlabel(r'Temperature [K]',size=15)
+        ylabel(r'Population $n_{r,1}/N$',size=15)
+        yscale('log')
+        ylim([1e-3,1.1])
+#        legend(['ground stage','first ion stage','second ion stage','third ion stage'],loc='best')
+        savefig('schadeenium_pop_higher.png')
+        show()
+        
