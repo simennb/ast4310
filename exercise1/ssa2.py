@@ -4,40 +4,42 @@ import astropy as ap
 from astropy import units
 rc('font',**{'family':'serif'}) 
 
-def partfunc_E(temp):
+def partfunc_E(temp,chiion):
     '''
     Calculates the partition function of Schadeenium for a given temperature
     '''
-    chiion = [7, 16, 31, 51]  # Schaade ionization energies
+    temp *= units.m   # to remove error cause astropy
+    # note to self, make sure to work dimensionless inside functions
+
+#    chiion = [7, 16, 31, 51]  # Schaade ionization energies
     k = ap.constants.k_B # Boltzmann constant in J/(K)
     U = zeros(4)
     for r in range(4):
-        for s in range(0, chiion[r]):
-            U[r] += exp(-s*units.eV/(k.to('eV/K')*temp))
+        for s in range(0, (chiion[r]).value):
+            U[r] += exp(-s/((k.to('eV/K')).value*temp.value))
             
     return U
 
-#U = partfunc_E(5000)
-#print U
 
 ###########################
 
-def boltz_E(temp,r,s):
+def boltz_E(temp,r,s,chiion):
     '''
     Computes Boltzmann distribution
     '''
-    U_r = partfunc_E(temp)
-    k = 8.61734e-5 # Boltzmann constant in eV/deg
+    temp *= units.m   # again fixing problems caused by my astropy usage
+    chiion *=units.eV # cause astropy problems
+    
+    U_r = partfunc_E(temp,chiion)
+    k = 8.61734e-5    # Boltzmann constant in eV/deg
+    
     relnrs = 1./U_r[r-1]*exp(-(s-1)/(k*temp.value))
 
     return relnrs
 
-#for s in range(1,11):
- #   print boltz_E(5000,1,s)
-
 ############################
 
-def saha_E(temp,elpress,ionstage):
+def saha_E(temp,elpress,ionstage,chiion):
     # Some constants
     m_e = ap.constants.m_e # mass of electron in kg
     h = ap.constants.h   # Planck constant in J s
@@ -49,9 +51,10 @@ def saha_E(temp,elpress,ionstage):
     eldens = elpress/kergT
 
     # Partition function
-    chiion = [7, 16, 31, 51]*units.eV  # Schaade ionization energies in eV
-    
-    u = partfunc_E(temp)
+#    chiion = [7, 16, 31, 51]*units.eV  # Schaade ionization energies in eV
+    chiion *=units.eV # cause astropy problems
+
+    u = partfunc_E(temp,chiion)
     u = np.append(u,2.0)
     
     # Saha constant
@@ -62,26 +65,42 @@ def saha_E(temp,elpress,ionstage):
     nstage[0] = 1
 
     for r in range(4):
-        nstage[r+1] = (nstage[r]*sahaconst*u[r+1]/u[r]*exp(-chiion[r]/kevT)).value
+        nstage[r+1] = (nstage[r]*sahaconst*u[r+1]/u[r]*exp(-(chiion[r]).value/kevT.value)).value
     ntotal = sum(nstage)
     nstagerel = nstage/ntotal
 
     return nstagerel[ionstage-1]
 
-#for r in range(1,6):
- #   print saha_E(20000*units.K,1e1,r)
-
 
 ##########################################
-def sahabolt_E(temp,elpress,ion,level):
+def sahabolt_E(temp,elpress,ion,level,chiion):
     '''
     Computes Saha-Boltzmann population n_(r,s)/N for level r,s of E
     '''
-    return saha_E(temp,elpress,ion)*boltz_E(temp,ion,level)
+    return saha_E(temp,elpress,ion,chiion)*boltz_E(temp,ion,level,chiion)
 
 
 if __name__=='__main__':
-    task = '2.5'
+    task = '2.5a'
+
+
+    chiion = array([7,16,31,51])*units.eV
+    temp_list = [5000,10000,20000]
+
+    for temp in temp_list:
+        print temp
+        U = partfunc_E(temp,chiion)
+        print 'U', U
+
+    for temp in temp_list:
+        print temp
+        for s in range(1,11):
+            print 's = %d : %.3e'%(s, boltz_E(temp,1,s,chiion))
+
+    for temp in temp_list:
+        print temp
+        for r in range(1,6):
+            print 'r = %d : %.3e'%(r, saha_E(temp*units.K,1e1,r,chiion))
 
 
     if task=='2.5':
@@ -109,15 +128,17 @@ if __name__=='__main__':
         '''
 
         # adding more lines
+        #xkcd()
         figure()
         grid('on')
         colors = ['b','g','r','k']
         lines = ['-','--','--']
         s = [1,2,4]
+        chiion = [7, 16, 31, 51]
         for j in range(len(s)):
             for T in np.arange(1,31):
                 for r in np.arange(1,5):
-                    pop[r,T] = sahabolt_E(temp[T],131.,r,s[j])
+                    pop[r,T] = sahabolt_E(temp[T],131.,r,s[j],chiion)
 
             # plot
             for i in range(1,5):
