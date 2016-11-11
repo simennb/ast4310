@@ -51,10 +51,7 @@ class SSB:
         h,logP,temp,logrho,logN = np.loadtxt('../data/earth.dat',unpack=True)
         # giving each an astropy unit
         h *= u.km
-        #logP *= u.dyn*u.cm**(-2)
         temp *= u.K
-        #logrho *= u.g*u.cm**(-3)
-        #logN *= u.cm**(-3)
 
         return h, logP, temp, logrho, logN
 
@@ -142,7 +139,7 @@ class SSB:
 
         kappabf = sigmabf*graysaha     # per neutral H atom
         kappabf = kappabf*(1.-np.exp(-self.h*self.c/(wav*1e-8*self.k_B*temp))) # correct stimulated
-        kappabf = kappabf.value/u.cm # shhh...
+        kappabf = kappabf.value/u.cm  # cause astropy trouble
 
         # check Gray's Saha-Boltzmann with AFYC (edition 1999) p168
         #logratio=-0.1761-np.log10(elpress.value)+np.log10(2.)+2.5*np.log10(temp.value)-theta*0.754
@@ -172,7 +169,7 @@ class SSB:
         '''
         tau = np.zeros(len(h), dtype=float) # initializing tau array
         ext = self.exthmin(wav, temp, eldens)
-        # add thompson and stuff
+        # add Thompson scattering
         ext = ext*n_neutral.value + (self.sigma_T*eldens)
 
         for i in range(1,len(tau)):
@@ -192,11 +189,11 @@ class SSB:
         for i in range(1, len(tau5)):
             ext[i] = (self.exthmin(wl, temp[i], nel[i])*(nhyd[i]-nprot[i]).value
                       + self.sigma_T*nel[i])
-            tau[i] = tau[i-1] + 0.5 * (ext[i] + ext[i-1]) * (h[i-1]-h[i])#*1E5
+            tau[i] = tau[i-1] + 0.5 * (ext[i] + ext[i-1]) * (h[i-1]-h[i])
             integrand[i] = (self.planck(temp[i],wl)*np.exp(-tau[i]/mu))
             intt += 0.5*(integrand[i]+integrand[i-1])*(tau[i]-tau[i-1])/mu
-            hint += h[i]*0.5*(integrand[i]+integrand[i-1])*(tau[i]-tau[i-1])#/mu
-            contfunc[i] = integrand[i]*ext[i]#.value
+            hint += h[i]*0.5*(integrand[i]+integrand[i-1])*(tau[i]-tau[i-1])
+            contfunc[i] = integrand[i]*ext[i]
         # note : exthmin has wavelength in [Angstrom], planck in [cm]
         hmean = hint / intt
 
@@ -343,9 +340,8 @@ class SSB:
 
     def NaD1_ext(self, wav, temp, eldens, nhyd, vmicro, pgas):
         # Wavelength given in [cm]
-        # not using astropy in order to increase speed :3 unsuccessful
-        # Functions called are modified to simplify and only work for the
-        # Na D1 line, as that is what we are interested in
+        # not using astropy in order to increase speed, hopefully
+        # Functions called are modified to simplify and only work for NaI D1
         m_e = self.m_e.value
         c = self.c.value
         hc = (self.h*c).value
@@ -366,7 +362,7 @@ class SSB:
         dopplerwidth, H = self.line_broadening(wav,temp,pgas,vmicro,m_Na,s,3)
 
         alpha1 = sqrt(pi)*e**2/(m_e*c)*wav**2/c*bl
-        alpha2 = self.sahaboltz_Na(temp, eldens, r, 1)  # s=1 cause gs?!?!?!?
+        alpha2 = self.sahaboltz_Na(temp, eldens, r, 1)
         alpha3 = nhyd*A_Na*f_D1
         alpha4 = H
         alpha5 = 1. - bu/bl*exp(-hc/(wav*k_B*temp))
@@ -375,7 +371,7 @@ class SSB:
         return alpha
 
     def emergent_intensity_Na(self,h,tau5,temp,nhyd,nprot,nel,wl,vmicro,pgas):
-        # New almost identical function since i removed units in my Na
+        # New almost identical function since removed units in Na
         # calculations as astropy seems to really slow things down
 
         # SSB 2.4 page 16 emergent intensity, contribution function and mean height of formation in FALC

@@ -11,11 +11,11 @@ h,tau5,colm,temp,vturb,nhyd,nprot,nel,ptot,pgasptot,dens = ssb.read_falc()
 nhel = 0.1*nhyd 
 wav,F, F_c, I, I_c = ssb.read_solspect()
 wave = wav.value
-'''
+
 ################################################################################
+'''
 temp_b = ssb.brightness_temp(I_c,wav)
 kappa = ssb.exthmin(wav, temp_b, nel[h==0])
-#print nel[h==0]
 
 plot(wav[wave<2.1],kappa[wave<2.1],lw=2)
 xlabel('wavelength [micron]',size=fs)
@@ -24,11 +24,11 @@ title('Extinction profile versus wavelength',size=fs)
 grid('on')
 #ylim([1.0e-25,1.8e-25])
 savefig(path+'exthmin_lam_kappa.png')
-# fix units on this shit############ # ##  ##   #   #  # # ### # #
 '''
-'''
+
 ################################################################################
 # height dependent extinction
+'''
 kappa = ssb.exthmin(wav[wave==0.5],temp,nel)
 # Make it not per neutral hydrogen
 n_neutral = nhyd-nprot
@@ -43,10 +43,11 @@ yscale('log')
 grid('on')
 xlim([-100,2100])
 savefig(path+'exthmin_2.png')
-
+'''
 
 ################################################################################
 # Thompson scattering
+'''
 kappa2 = kappa.value + (ssb.sigma_T*nel).value
 
 figure()
@@ -62,9 +63,11 @@ xlim([-100,2100])
 ylim([1e-18,1e-5])
 grid('on')
 savefig(path+'exthmin_3.png')
+'''
 
 ################################################################################
 # Integration
+'''
 tau = ssb.optical_depth(h, temp, nel, n_neutral)
 
 figure()
@@ -78,17 +81,21 @@ yscale('log')
 grid('on')
 savefig(path+'exthmin_h_tau.png')
 '''
+
 ################################################################################
 # Emergent intensity and height of formation
+'''
 wl = 0.5*u.micron
 intt, contfunc, hmean = ssb.emergent_intensity(h,tau5,temp,nhyd,nprot,nel,wl)
 
 print ('computed continuum intensity wl =%g : %g erg s-1 cm-2 ster-1 cm-1'%(wl.value, intt.value))
 w = np.where(wav.value == wl.value)
 print ('observed continuum intensity wav=%g : %g erg s-1 cm-2 ster-1 cm-1'%(wav[w].value, I_c[w].value*1e4))
-
 '''
+
+################################################################################
 # Plot one wl
+'''
 figure()
 contfunc /= max(contfunc.value)
 plot(h,contfunc,lw=2)
@@ -100,8 +107,11 @@ grid('on')
 xlim([-100,500])
 annotate('mean height of formation = %.1f km'%hmean.value, (10,0.83),size=15)
 savefig(path+'emergent_intensity_1.png')
+'''
 
+################################################################################
 # Plot multiple wl
+'''
 cl = ['blue','red','green','cyan']
 figure()
 
@@ -120,9 +130,10 @@ grid('on')
 savefig(path+'emergent_intensity_2.png')
 '''
 
-'''
+
 ################################################################################
 # Disk-center intensity
+'''
 em_int = np.zeros(len(wave))
 for i in range(len(wave)):
     intt, contfunc, hmean = ssb.emergent_intensity(h,tau5,temp,nhyd,nprot,nel,wav[i])
@@ -138,9 +149,10 @@ legend(loc='best',fontsize=15)
 grid('on')
 savefig(path+'disc_center.png')
 '''
-'''
+
 ################################################################################
 # Limb darkening
+'''
 figure()
 mu = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
 int_mu = np.zeros(len(wave))
@@ -159,6 +171,7 @@ grid('on')
 savefig(path+'limb_darkening_1.png')
 '''
 
+################################################################################
 # Plot 2
 '''
 figure()
@@ -180,11 +193,11 @@ title('Limb darkening in FALC',size=fs)
 legend(loc='best',fontsize=15)
 grid('on')
 savefig(path+'limb_darkening_2.png')
-
 '''
 
 ################################################################################
 # Flux integration
+'''
 fluxspec = ssb.flux_integration(h,tau5,temp,nhyd,nprot,nel, wav)
 
 figure()
@@ -196,4 +209,6 @@ title('Observed and computed continuum flux',size=fs)
 grid('on')
 legend(loc='best',fontsize=15)
 savefig(path+'flux.png')
+'''
+
 show()

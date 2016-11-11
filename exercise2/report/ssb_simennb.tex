@@ -397,6 +397,21 @@ We start by reading in the data from the data file
   \caption{Solar disk-center intensity plotted against air wavelengths. We find the location of the minimas to be in $\lambda_1 = 5889.95$ Å, and $\lambda_2 = 5895.92$ Å. We observe that the minimas are very close to the expected location of the lines.}
 \end{figure}
 
+\subsection{Implementing LTE line formation}
+We test to see if our implementation of the Saha-Boltzmann distributions return reasonable results.
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[scale=0.37]{../figures/task3/boltzmann.png}
+    \caption{Boltzmann distribution for different excitation levels $s$.}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[scale=0.37]{../figures/task3/saha.png}
+    \caption{Saha distribution for different ionization levels $r$.}
+  \end{subfigure}
+  \caption{The panels show that the Saha-Boltzmann functions for Na gives the results we would expect, based on the figure shown to us.}
+\end{figure}
+
 \subsection{Computed Na D$_1$ line profile}
 
 \begin{figure}[H]
@@ -412,5 +427,19 @@ Following tradition, we add a collisional enhancement factor $E$ to the $\gamma_
   \caption{Computed line profile plotted against wavelength, with the observed line profile overplotted. Here we have after experimenting set the fudge factor $E$ to $E=3$ in order to get a better fit. As we see, it fits the observed data better than without the factor.}
 \end{figure}
 \section{Appendix - Python code}
+All code used can be found in the GitHub repository located at\\\href{https://github.com/simennb/ast4310/tree/master/exercise2/src}{https://github.com/simennb/ast4310/tree/master/exercise2/src}
+\\The python-code is also appended below
+\subsection{General tools and functions for all programs}
+\verbatiminput{../src/ssb.py}
+\subsection{FALC plotting}
+\verbatiminput{../src/falc.py}
+\subsection{Earth plotting}
+\verbatiminput{../src/earth.py}
+\subsection{Exercise 2.1}
+\verbatiminput{../src/task2.py}
+\subsection{Rest of exercise 2}
+\verbatiminput{../src/task2_2.py}
+\subsection{Exercise 3}
+\verbatiminput{../src/task3.py}
 
 \end{document}

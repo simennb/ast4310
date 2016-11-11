@@ -11,9 +11,10 @@ h,tau5,colm,temp,vturb,nhyd,nprot,nel,ptot,pgasptot,dens = ssb.read_falc()
 
 nhel = 0.1*nhyd 
 
-'''
+
 ################################################################################
 # Temperature stratification
+'''
 figure()
 plot(h, temp,lw=2)
 grid('on')
@@ -95,7 +96,7 @@ savefig(path+'falc_h_dens3.png')
 ################################################################################
 # Gas pressure plotted against height
 '''
-for i in range(3): # because multiple plots.........
+for i in range(3): # because multiple plots
     pgas = pgasptot*ptot
     p_str = 'n_H + n_e'
     if i==0:
@@ -159,9 +160,9 @@ savefig(path+'falc_h_Hion.png')
 '''
 
 ################################################################################
-# do final part of 1.2, it makes little sense
+# do final part of 1.2
+'''
 # at deepest part of the atmosphere
-
 print 'At h = %.3f :'%(h[-1]).value
 print ' n_hydrogen = %.3e'%(nhyd[-1]).value
 print ' n_photon   = %.3e'%(20*temp[-1]**3).value
@@ -171,6 +172,6 @@ print '\nAt h = %.3f :'%(h[0]).value
 print ' n_hydrogen = %.3e'%(nhyd[0]).value
 temp_eff = 5770*u.K
 print ' n_photon   = %.3e'%(20*temp_eff**3/(2*pi)).value
-
+'''
 
 show()
